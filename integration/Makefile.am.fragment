@@ -1,0 +1,6 @@
+# Append to Mellanox/mstflint v4.35.0-1.9 mlxreg/Makefile.am
+noinst_PROGRAMS += q3400_reader
+q3400_reader_SOURCES = q3400_reader.cpp pddr_module_snapshot.h
+q3400_reader_DEPENDENCIES = $(mstreg_DEPENDENCIES)
+q3400_reader_LDADD = $(q3400_reader_DEPENDENCIES) $(liblzma_LIBS) ${LDL} $(expat_LIBS)
+q3400_reader_LDFLAGS = -static

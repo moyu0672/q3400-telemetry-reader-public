@@ -1,0 +1,18 @@
+# Local build products
+/build/
+/mlxreg/q3400_reader
+*.o
+*.lo
+*.la
+
+# Runtime/output artifacts intentionally excluded from the public repository
+*.log
+*.jsonl
+runtime_artifacts/
+q3400_phy_map.tsv
+q3400_*_*.csv
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
