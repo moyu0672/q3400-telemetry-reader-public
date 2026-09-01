@@ -25,10 +25,13 @@ jobs:
         run: |
           git clone --depth 1 --branch v4.35.0-1.9 https://github.com/Mellanox/mstflint.git upstream-mstflint
 
-      - name: Integrate Q3400 Reader
+      - name: Integrate Reader and probes
         run: |
           cp mlxreg/q3400_reader.cpp upstream-mstflint/mlxreg/
           cp mlxreg/pddr_module_snapshot.h upstream-mstflint/mlxreg/
+          cp probes/ppcnt_persistent_bench.cpp upstream-mstflint/mlxreg/
+          cp probes/fec_histogram_probe.cpp upstream-mstflint/mlxreg/
+          cp probes/pddr_module_probe.cpp upstream-mstflint/mlxreg/
           cat integration/Makefile.am.fragment >> upstream-mstflint/mlxreg/Makefile.am
           cp tests/q3400_phy_map.example.tsv upstream-mstflint/tests_q3400_phy_map.example.tsv
           cp tests/run_software_checks.sh upstream-mstflint/tests_run_software_checks.sh
@@ -39,9 +42,10 @@ jobs:
           ./autogen.sh
           ./configure --disable-inband
 
-      - name: Build Reader
+      - name: Build Reader and probes
         working-directory: upstream-mstflint
-        run: make -C mlxreg q3400_reader -j2
+        run: |
+          make -C mlxreg q3400_reader ppcnt_persistent_bench pddr_module_probe fec_histogram_probe -j2
 
       - name: Run software-only checks
         working-directory: upstream-mstflint
