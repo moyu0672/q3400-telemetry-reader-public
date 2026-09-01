@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-self-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout extension
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf automake libtool pkg-config make g++ \
+            liblzma-dev libexpat1-dev libpci-dev libusb-1.0-0-dev \
+            zlib1g-dev
+
+      - name: Checkout validated mstflint baseline
+        run: |
+          git clone --depth 1 --branch v4.35.0-1.9 https://github.com/Mellanox/mstflint.git upstream-mstflint
+
+      - name: Integrate Q3400 Reader
+        run: |
+          cp mlxreg/q3400_reader.cpp upstream-mstflint/mlxreg/
+          cp mlxreg/pddr_module_snapshot.h upstream-mstflint/mlxreg/
+          cat integration/Makefile.am.fragment >> upstream-mstflint/mlxreg/Makefile.am
+          cp tests/q3400_phy_map.example.tsv upstream-mstflint/tests_q3400_phy_map.example.tsv
+          cp tests/run_software_checks.sh upstream-mstflint/tests_run_software_checks.sh
+
+      - name: Bootstrap and configure
+        working-directory: upstream-mstflint
+        run: |
+          ./autogen.sh
+          ./configure --disable-inband
+
+      - name: Build Reader
+        working-directory: upstream-mstflint
+        run: make -C mlxreg q3400_reader -j2
+
+      - name: Run software-only checks
+        working-directory: upstream-mstflint
+        run: |
+          bash tests_run_software_checks.sh ./mlxreg/q3400_reader ./tests_q3400_phy_map.example.tsv
