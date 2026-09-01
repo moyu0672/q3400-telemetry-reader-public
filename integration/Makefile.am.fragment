@@ -1,6 +1,23 @@
 # Append to Mellanox/mstflint v4.35.0-1.9 mlxreg/Makefile.am
-noinst_PROGRAMS += q3400_reader
+# Core reader plus validation-only probes.
+noinst_PROGRAMS += q3400_reader ppcnt_persistent_bench pddr_module_probe fec_histogram_probe
+
 q3400_reader_SOURCES = q3400_reader.cpp pddr_module_snapshot.h
 q3400_reader_DEPENDENCIES = $(mstreg_DEPENDENCIES)
 q3400_reader_LDADD = $(q3400_reader_DEPENDENCIES) $(liblzma_LIBS) ${LDL} $(expat_LIBS)
 q3400_reader_LDFLAGS = -static
+
+ppcnt_persistent_bench_SOURCES = ppcnt_persistent_bench.cpp
+ppcnt_persistent_bench_DEPENDENCIES = $(mstreg_DEPENDENCIES)
+ppcnt_persistent_bench_LDADD = $(ppcnt_persistent_bench_DEPENDENCIES) $(liblzma_LIBS) ${LDL} $(expat_LIBS)
+ppcnt_persistent_bench_LDFLAGS = -static
+
+pddr_module_probe_SOURCES = pddr_module_probe.cpp pddr_module_snapshot.h
+pddr_module_probe_DEPENDENCIES = $(mstreg_DEPENDENCIES)
+pddr_module_probe_LDADD = $(pddr_module_probe_DEPENDENCIES) $(liblzma_LIBS) ${LDL} $(expat_LIBS)
+pddr_module_probe_LDFLAGS = -static
+
+fec_histogram_probe_SOURCES = fec_histogram_probe.cpp
+fec_histogram_probe_DEPENDENCIES = $(mstreg_DEPENDENCIES)
+fec_histogram_probe_LDADD = $(fec_histogram_probe_DEPENDENCIES) $(liblzma_LIBS) ${LDL} $(expat_LIBS)
+fec_histogram_probe_LDFLAGS = -static
