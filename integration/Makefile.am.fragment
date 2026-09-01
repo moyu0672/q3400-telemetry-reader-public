@@ -1,6 +1,6 @@
 # Append to Mellanox/mstflint v4.35.0-1.9 mlxreg/Makefile.am
 # Core reader plus validation-only probes.
-noinst_PROGRAMS += q3400_reader ppcnt_persistent_bench pddr_module_probe fec_histogram_probe
+noinst_PROGRAMS = q3400_reader ppcnt_persistent_bench pddr_module_probe fec_histogram_probe
 
 q3400_reader_SOURCES = q3400_reader.cpp pddr_module_snapshot.h
 q3400_reader_DEPENDENCIES = $(mstreg_DEPENDENCIES)
