@@ -42,10 +42,14 @@ jobs:
           ./autogen.sh
           ./configure --disable-inband
 
-      - name: Build Reader and probes
+      - name: Build mlxreg targets
         working-directory: upstream-mstflint
         run: |
-          make -C mlxreg q3400_reader ppcnt_persistent_bench pddr_module_probe fec_histogram_probe -j2
+          make -C mlxreg -j2
+          test -x mlxreg/q3400_reader
+          test -x mlxreg/ppcnt_persistent_bench
+          test -x mlxreg/pddr_module_probe
+          test -x mlxreg/fec_histogram_probe
 
       - name: Run software-only checks
         working-directory: upstream-mstflint
