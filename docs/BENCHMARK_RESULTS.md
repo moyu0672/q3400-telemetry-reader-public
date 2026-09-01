@@ -18,6 +18,8 @@ For the last full-capability run, cold initialization was about 2.606 s, channel
 
 The main gain is removal of repeated fixed overhead. A one-shot `mlxreg`-style command in the same development environment was on the order of 0.56 s per GET because each invocation paid process startup, ADB parsing, MST/device initialization, and parser setup again. The persistent Reader pays those costs once and reuses contexts/templates. This does not mean the underlying hardware register transaction became tens or hundreds of times faster.
 
+`probes/ppcnt_persistent_bench.cpp` is the isolated persistent PPCNT benchmark used to measure the single-context GET path. `probes/fec_histogram_probe.cpp` isolates the two-GET histogram path, and `probes/pddr_module_probe.cpp` isolates module/status register reads. These probes are validation tools rather than Reader Core dependencies.
+
 In one full-chassis histogram run, 112 of 580 requested logical-channel histogram reads succeeded. The same run found 14 present modules; `14 x 8 = 112`. This matched the active/present-port population and was treated as expected partial availability, not as a histogram implementation failure.
 
-For reproducibility, record the upstream commit, target MFT/NVOS version, ADB hash, Reader commit, mapping hash/counts, capabilities, cold/hot distinction, and success/failure counts.
+For reproducibility, record the upstream commit, target MFT/NVOS version, ADB hash, Reader commit, mapping hash/counts, capabilities, cold/hot distinction, and success/failure counts. Do not publish device-derived topology, serial numbers, raw customer/device logs, or other environment-specific data solely for benchmark reproducibility.
