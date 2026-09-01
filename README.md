@@ -1,8 +1,10 @@
 # Q3400 Read-only Telemetry Reader
 
+[![build](https://github.com/moyu0672/q3400-telemetry-reader-public/actions/workflows/build.yml/badge.svg)](https://github.com/moyu0672/q3400-telemetry-reader-public/actions/workflows/build.yml)
+
 An independent, high-throughput, GET-only telemetry prototype for NVIDIA Q3400 built against the public NVIDIA/Mellanox `mstflint` Access Register stack.
 
-This repository contains the project-specific Reader source and public engineering documentation only. It intentionally does **not** redistribute a device-derived full topology map, runtime ADB copy, compiled binary, raw device logs, or presentation/export code.
+This repository contains the project-specific Reader source, validation probes, synthetic software-only fixtures, CI integration, and public engineering documentation. It intentionally does **not** redistribute a device-derived full topology map, runtime ADB copy, compiled binary, raw device logs, or presentation/export code.
 
 > This is not an official NVIDIA product or support tool. NVIDIA, Mellanox, Q3400, NVOS, and related names are used only to identify the tested platform and upstream software.
 
@@ -15,6 +17,9 @@ This repository contains the project-specific Reader source and public engineeri
 - PDDR page 3 module/DDM snapshots.
 - Structured raw output plus in-memory physical/logical-port aggregation.
 - Explicit partial-failure handling and read-only safety boundaries.
+- Small validation probes that isolate PPCNT, histogram, and module/status register paths.
+- Synthetic mapping fixtures and software-only self-tests.
+- GitHub Actions integration that builds against the validated public `mstflint` baseline without accessing Q3400 hardware.
 
 ## Measured results
 
@@ -49,6 +54,23 @@ mlxreg/
   q3400_reader.cpp
   pddr_module_snapshot.h
 
+probes/
+  README.md
+  ppcnt_persistent_bench.cpp
+  fec_histogram_probe.cpp
+  pddr_module_probe.cpp
+
+tests/
+  README.md
+  q3400_phy_map.example.tsv
+  run_software_checks.sh
+
+integration/
+  Makefile.am.fragment
+
+.github/workflows/
+  build.yml
+
 docs/
   ARCHITECTURE.md
   BENCHMARK_RESULTS.md
@@ -59,6 +81,16 @@ docs/
   UPSTREAM_AND_LICENSE.md
 ```
 
+## Validation layers
+
+The project intentionally separates three kinds of evidence:
+
+1. `q3400_reader` is the Reader Core prototype.
+2. `probes/` contains small hardware-facing experiments used to isolate one register path at a time. They are not Reader Core features.
+3. `tests/` and CI exercise mapping/aggregation/build behavior without Q3400 hardware.
+
+The CI workflow checks out the validated public `mstflint` tag, integrates the Reader and probes, builds all four binaries, and runs the software-only Reader self-tests. It does not open PCI devices or issue hardware Access Register transactions.
+
 ## Topology mapping policy
 
 The tested Reader uses a TSV topology mapping with columns:
@@ -68,6 +100,8 @@ label_port  ipil  channel  split  pciconf  local_port  module  sub_module
 ```
 
 The complete device-derived 580-object mapping used in the private validation environment is intentionally **not distributed in this public repository**. See [`docs/Q3400_TOPOLOGY_MAPPING.md`](docs/Q3400_TOPOLOGY_MAPPING.md) for the schema, logical-channel rule, validation requirements, and why users must supply a mapping validated for their own chassis/firmware environment.
+
+`tests/q3400_phy_map.example.tsv` is synthetic and exists only for software validation. It must not be treated as a hardware mapping.
 
 The current Reader source also contains a tested `pciconf -> PCI BDF` mapping. PCI enumeration is environment-specific; validate or adapt it before hardware use.
 
@@ -83,6 +117,8 @@ The public Reader baseline is read-only:
 
 `COUNTERS` uses PPCNT `grp=0x16` with `clr=0`; `HISTOGRAM_READ` uses PPHCR GET plus PPCNT `grp=0x23` with `clr=0`; `MODULE_SNAPSHOT` uses PDDR page 3 GET.
 
+The validation probes are also GET-only. Some probe modes intentionally inspect registers that are outside current Reader Core scope, such as PDDR page 9 or PMAOS; their presence does not mean those capabilities are implemented in the Reader.
+
 ## Build / integration
 
 This repository is an extension source package, not a standalone copy of `mstflint`. To build it, start from the matching public `mstflint` baseline and integrate the files as described in [`docs/BUILD_AND_INTEGRATION.md`](docs/BUILD_AND_INTEGRATION.md).
@@ -91,7 +127,7 @@ Do not run the hardware path until the topology mapping, PCI enumeration, ADB, t
 
 ## Scope
 
-Implemented:
+Implemented in Reader Core:
 
 - PPCNT counters
 - GET-only FEC histogram
